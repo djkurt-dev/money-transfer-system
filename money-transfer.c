@@ -27,7 +27,7 @@ int generateCode(){
 
 int sendmoney(){
 	system("cls");
-	printf("\n\n\t| ====================== SEND MONEY ====================== |\n\n\n");
+	printf("\n\n\t| ================================================= SEND MONEY ================================================= |\n\n");
 	transaction tr;
 	char ch, converted[10], trans_code[10]="KMTS",fileName[15]="unclaimed.txt";
 	int code;
@@ -101,7 +101,7 @@ int sendmoney(){
 	strcpy(tr.code,trans_code);
 	
 	fprintf(fp,"%s\t%.2lf\t\t%s\t%s\t%s\t%s\n",tr.code,tr.amount,tr.sender,tr.sender_phone,tr.receiver,tr.receiver_phone);
-	printf("\n\n\t| ************************* MONEY SENT SUCCESSFULLY ************************* |\n");
+	printf("\n\n\t| ***************************************** MONEY SENT SUCCESSFULLY ****************************************** |\n");
 	printf("\n\t\tREFERENCE CODE: %37s\n\t\tSENDER\n\t\t\t%45s\n\t\t\t%45s\n\t\tRECEIVER\n\t\t\t%45s\n\t\t\t%45s\n\t\tAmount: Php%42.2lf\n\t\tService Fee: Php%37.2lf\n\t\tTOTAL => Php%41.2lf",tr.code,tr.sender,tr.sender_phone,tr.receiver,tr.receiver_phone,tr.amount,charge,total);
 
 	fclose(fp);
@@ -109,11 +109,11 @@ int sendmoney(){
 }
 void claim(){
 	system("cls");
-	printf("\n\n\t| ================================= CLAIM MONEY ================================= |\n\n\n");
+	printf("\n\n\t| ================================================= CLAIM MONEY ================================================= |\n\n");
 	transaction cl;
 	FILE *fp,*fp2,*temp;
 	char cont,line[500],*token,ch,code[15],temp_line[500];
-	int i,j,count=0,found=0;
+	int count=0,found=0;
 	enter_ref:
 	printf("\n\t\tEnter Reference Code: ");	
 	scanf("%s",code);
@@ -179,8 +179,9 @@ void claim(){
 	}	
 	fclose(temp);
 	fclose(fp);
+	remove("temp.txt");
 	system("cls");
-	printf("\n\n\t| ************************ MONEY CLAIMED SUCCESSFULLY ************************ |\n");
+	printf("\n\n\t| ***************************************** MONEY CLAIMED SUCCESSFULLY ****************************************** |\n");
 	printf("\n\t\tREFERENCE CODE: %37s\n\t\tAmount: %45.2lf\n\t\tCLAIMED BY:\n\t\t\t%45s\n\t\t\t%45s\n",cl.code,cl.amount,cl.receiver,cl.receiver_phone);
 	menu();
 }
@@ -293,7 +294,7 @@ void main_exit(){
 
 void _login(int *log){
 	system("cls");
-	printf("\n\n\t| ================================= LOGIN ================================= |\n\n");
+	printf("\n\n\t| ================================================= LOGIN ================================================= |\n\n");
 	FILE *accounts;
 	accounts = fopen("accounts.txt","r");
 	char ch;	
@@ -312,7 +313,7 @@ void _login(int *log){
 }
 void _signup(int *sgd){
 	system("cls");
-	printf("\n\n\t| ================================= SIGN UP ================================= |\n\n");
+	printf("\n\n\t| ================================================= SIGN UP ================================================= |\n\n");
 	FILE *accounts;
 	
 	char line[500],ch,*token;
@@ -338,11 +339,106 @@ void _signup(int *sgd){
 	fprintf(accounts,"%s\t%s\n",signup.email,signup.password);
 	fclose(accounts);
 }
+
+void edit_acc(char _current_email[30], char _new_email[30], char _new_password[30]){
+	FILE *acc,*temp;
+	acc = fopen("accounts.txt","r");
+	temp = fopen("temp.txt","a+");
+	int found=0;
+	char line[500],temp_line[50],*token;
+	while(fgets(line, sizeof(line), acc)){
+		strcpy(temp_line,line);
+		token = strtok(line,"\t");
+		if(strcmp(token,_current_email) != 0){
+			fprintf(temp,"%s",temp_line);
+		}
+	}
+	fprintf(temp,"%s\t%s\n",_new_email,_new_password);
+	fclose(acc);
+	fclose(temp);
+	acc = fopen("accounts.txt","w");
+	temp = fopen("temp.txt","r");
+	while(fgets(line, sizeof(line), temp)){
+		fprintf(acc,"%s",line);
+	}
+	printf("\n\t\t#################### ACCOUNT EDITED SUCCESSFULLY ####################");
+	fclose(acc);
+	fclose(temp);
+	remove("temp.txt");
+	menu();
+}
+void delete_acc(char _email[30]){
+	FILE *acc,*temp;
+	acc = fopen("accounts.txt","r");
+	temp = fopen("temp.txt","a+");
+	int found=0;
+	char line[500],temp_line[50],*token;
+	while(fgets(line, sizeof(line), acc)){
+		strcpy(temp_line,line);
+		token = strtok(line,"\t");
+		if(strcmp(token,_email) != 0){
+			fprintf(temp,"%s",temp_line);
+		}
+	}
+	fclose(acc);
+	fclose(temp);
+	acc = fopen("accounts.txt","w");
+	temp = fopen("temp.txt","r");
+	while(fgets(line, sizeof(line), temp)){
+		fprintf(acc,"%s",line);
+	}
+	system("cls");
+	printf("\n\t\t\t#################### ACCOUNT DELETED SUCCESSFULLY ####################");
+	fclose(acc);
+	fclose(temp);
+	remove("temp.txt");
+	main();
+}
+void acc_settings(){
+	system("cls");
+	printf("\n\n\t| ============================================ ACCOUNT SETTINGS =========================================== |\n\n");
+	int task;
+	char ch,cur_email[30],new_email[30],new_password[15];
+	choose_task:
+	printf("\n\n\t\t\t1. EDIT ACCOUNT\n");
+	printf("\n\t\t\t2. DELETE ACCOUNT\n");
+	printf("\n\t\t\t0.  MENU\n\n\t\t\t>> ");
+	scanf("%d",&task);
+	
+	switch(task){
+		case 1:
+			printf("\n\n\t\t\t#################### EDIT YOUR ACCOUNT ####################");
+			printf("\n\n\t\t\t\tEnter your current email: ");
+			ch = getchar();
+			gets(cur_email);
+			printf("\n\t\t\t\tEnter your new email: ");
+			gets(new_email);
+			printf("\t\t\t\tEnter your new password: ");
+			gets(new_password);
+			edit_acc(cur_email,new_email,new_password);
+			break;
+		case 2:
+			printf("\n\n\t\t\t#################### DELETE YOUR ACCOUNT ####################");
+			printf("\n\n\t\t\t\tEnter your current email: ");
+			ch = getchar();
+			gets(cur_email);
+			delete_acc(cur_email);
+			break;
+		case 0:
+			system("cls");
+			menu();
+			break;
+		default:
+			system("cls");
+			printf("\t\t!!!!!!!!!!!! INVALID SELECTION !!!!!!!!!!!!");
+			goto choose_task;
+	}
+}
 int landing(){
 	int task;
-	printf("\n\t\t1. Login\n");
-	printf("\t\t2. Sign Up\n");
-	printf("\t\t0. Exit\n\t\t>> ");
+	printf("\n\t\t1. Login\n\n");
+	printf("\t\t2. Sign Up\n\n");
+	printf("\t\t0. Exit\n\n\t\t>> ");
 	scanf("%d",&task);
 	return task;
 }
@@ -355,6 +451,7 @@ void menu(){
 	printf("\n\t\t\t\t\t3. VIEW ALL TRANSACTIONS");
 	printf("\n\t\t\t\t\t4. VIEW CLAIMED");
 	printf("\n\t\t\t\t\t5. VIEW UNCLAIMED");
+	printf("\n\t\t\t\t\t6. ACCOUNT SETTINGS");
 	printf("\n\t\t\t\t\t0. LOGOUT\n\n\t\t\t\t\t>> ");
 	scanf("%d",&ch);
 	switch(ch){
@@ -372,6 +469,9 @@ void menu(){
 			break;
 		case 5:
 			view_unclaimed();
+			break;
+		case 6:
+			acc_settings();
 			break;
 		case 0:
 			system("cls");
