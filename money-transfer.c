@@ -1,8 +1,14 @@
-#include <stdio.h>
+
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <windows.h>
+#include <stdio.h>
+
+void menu();
+void main();
+int sendmoney();
+char loggedEmail[30];
 
 typedef struct transaction{
 	char code[12];
@@ -25,25 +31,47 @@ int generateCode(){
 	return code;
 }
 
-int sendmoney(){
+void delay(int a){
+	int add,time,i;
+	
+	time = a*100000000;
+	for(i=0;i<time;i++){
+		add*=i;
+		add++;
+		add++;
+	}
+}
+
+void fordelay(){
+	int i;
+	printf("\n\n\n\t\t\t\t\t\t\t");
+	for(i=0;i<3;i++){
+		printf("* ");	
+		delay(1);
+	}
 	system("cls");
+}
+
+int sendmoney(){
+	fordelay();
 	printf("\n\n\t| ================================================= SEND MONEY ================================================= |\n\n");
 	transaction tr;
 	char ch, converted[10], trans_code[10]="KMTS",fileName[15]="unclaimed.txt";
 	int code;
 	double charge, total;
+	
 	FILE *fp;
 	fp = fopen("unclaimed.txt","a");
 	if(!fp){
 		printf("\n Unable to open : %s.", fileName);
 		return -1;
 	}
+	
 	printf("\n\t\tSENDER (name in ALL CAPS): ");
 	ch = getchar();
 	gets(tr.sender);
 	printf("\n\t\tSENDER (phone): ");
-	gets(tr.sender_phone);
-	
+	gets(tr.sender_phone);	
 	printf("\n\t\tRECEIVER (name in ALL CAPS): ");
 	gets(tr.receiver);
 	printf("\n\t\tRECEIVER (phone): ");
@@ -100,23 +128,29 @@ int sendmoney(){
 	strcat(trans_code,converted);
 	strcpy(tr.code,trans_code);
 	
+	
+	
 	fprintf(fp,"%s\t%.2lf\t\t%s\t%s\t%s\t%s\n",tr.code,tr.amount,tr.sender,tr.sender_phone,tr.receiver,tr.receiver_phone);
 	printf("\n\n\t| ***************************************** MONEY SENT SUCCESSFULLY ****************************************** |\n");
-	printf("\n\t\tREFERENCE CODE: %37s\n\t\tSENDER\n\t\t\t%45s\n\t\t\t%45s\n\t\tRECEIVER\n\t\t\t%45s\n\t\t\t%45s\n\t\tAmount: Php%42.2lf\n\t\tService Fee: Php%37.2lf\n\t\tTOTAL => Php%41.2lf",tr.code,tr.sender,tr.sender_phone,tr.receiver,tr.receiver_phone,tr.amount,charge,total);
+	printf("\n\t\t\t\tREFERENCE CODE: %37s\n\t\t\t\tSENDER\n\t\t\t\t\t%45s\n\t\t\t\t\t%45s\n\t\t\t\tRECEIVER\n\t\t\t\t\t%45s\n\t\t\t\t\t%45s\n\t\t\t\tAmount: Php%42.2lf\n\t\t\t\tService Fee: Php%37.2lf\n\t\t\t\tTOTAL => Php%41.2lf",tr.code,tr.sender,tr.sender_phone,tr.receiver,tr.receiver_phone,tr.amount,charge,total);
 
 	fclose(fp);
 	menu();
 }
+
 void claim(){
-	system("cls");
+	fordelay();
 	printf("\n\n\t| ================================================= CLAIM MONEY ================================================= |\n\n");
+
 	transaction cl;
 	FILE *fp,*fp2,*temp;
 	char cont,line[500],*token,ch,code[15],temp_line[500];
-	int count=0,found=0;
+	int found=0;
+	
 	enter_ref:
 	printf("\n\t\tEnter Reference Code: ");	
 	scanf("%s",code);
+	
 	fp = fopen("unclaimed.txt","r");
 	fp2 = fopen("claimed.txt","a");
 	
@@ -141,10 +175,11 @@ void claim(){
 			fclose(fp2);
 		}
 	}
+	
 	if(!found){
-		printf("\n\t\t!!!!!!!!!!!! TRANSACTION NOT FOUND !!!!!!!!!!!!");		
+		printf("\n\t\t\t\t!!!!!!!!!!!! TRANSACTION NOT FOUND !!!!!!!!!!!!");		
 		to_continue:
-		printf("\n\t\tDo you want to enter again? [y/n] : ");		
+		printf("\n\t\t\t\tDo you want to enter again? [y/n] : ");		
 		ch=getchar();
 		cont=getchar();
 		if(cont == 'Y' || cont == 'y'){
@@ -155,10 +190,11 @@ void claim(){
 			menu();
 		} 
 		else{
-			printf("\n\t\t!!!!!!!!!!!! INVALID SELECTION !!!!!!!!!!!!");
+			printf("\n\t\t\t\t!!!!!!!!!!!! INVALID SELECTION !!!!!!!!!!!!");
 			goto to_continue;
 		}
 	}	
+	
 	temp = fopen("temp.txt","w");
 	fp = fopen("unclaimed.txt","r");
 	while(fgets(line, sizeof(line), fp)){
@@ -176,83 +212,34 @@ void claim(){
 	fp = fopen("unclaimed.txt","w");
 	while(fgets(line, sizeof(line), temp)){
 		fprintf(fp,"%s",line);
-	}	
+	}		
 	fclose(temp);
 	fclose(fp);
 	remove("temp.txt");
-	system("cls");
+	
+	fordelay();
 	printf("\n\n\t| ***************************************** MONEY CLAIMED SUCCESSFULLY ****************************************** |\n");
-	printf("\n\t\tREFERENCE CODE: %37s\n\t\tAmount: %45.2lf\n\t\tCLAIMED BY:\n\t\t\t%45s\n\t\t\t%45s\n",cl.code,cl.amount,cl.receiver,cl.receiver_phone);
+	printf("\n\t\t\t\tREFERENCE CODE: %37s\n\t\t\t\tAmount: %45.2lf\n\t\t\t\tCLAIMED BY:\n\t\t\t\t\t%45s\n\t\t\t\t\t%45s\n",cl.code,cl.amount,cl.receiver,cl.receiver_phone);
 	menu();
 }
 
-int view_claimed(){
-	system("cls");
-	printf("\n\n\t| ================================================= CLAIMED ================================================= |\n\n");
-	FILE *fp;
-	char fileName[20] = "claimed.txt";
-	int count=0;
-	fp = fopen("claimed.txt","r");
-	if(!fp){
-		printf("\n Unable to open : %s ", fileName);
-		return -1;
-	}
-	char line[500];
-	printf("\n\t\t-------------------------------------------------------------------------------------------\n");
-	printf("\t\tRef. Code\tAmount\t\tSender\t\tPhone\t\tReceiver\tPhone");
-	printf("\n\t\t-------------------------------------------------------------------------------------------\n");
-	while (fgets(line, sizeof(line), fp)) {
-		count++;
-		printf("\t\t%s", line); 	
-	}
-	if(!count){
-		printf("\t\t\t\t\t\tNO CLAIMED TRANSACTIONS\n");
-	}
-	printf("\t\t-------------------------------------------------------------------------------------------\n");
-	fclose(fp);
-	printf("\n\n\t| ================================================= CLAIMED ================================================= |\n\n");
-	menu();
-}
-int view_unclaimed(){
-	system("cls");
-	printf("\n\n\t| =============================================== UNCLAIMED =============================================== |\n\n");
-	FILE *fp;
-	char fileName[20] = "unclaimed.txt";
-	int count=0;
-	fp = fopen("unclaimed.txt","r");
-	if(!fp){
-		printf("\n Unable to open : %s ", fileName);
-		return -1;
-	}
-	char line[500];
-	printf("\n\t\t-------------------------------------------------------------------------------------------\n");
-	printf("\t\tRef. Code\tAmount\t\tSender\t\tPhone\t\tReceiver\tPhone");
-	printf("\n\t\t-------------------------------------------------------------------------------------------\n");
-	while (fgets(line, sizeof(line), fp)) {
-		count++;
-		printf("\t\t%s", line); 
-	}
-	if(!count){
-		printf("\t\t\t\t\t\tNO UNCLAIMED TRANSACTIONS\n");
-	}
-	printf("\t\t-------------------------------------------------------------------------------------------\n");
-	fclose(fp);
-	printf("\n\n\t| =============================================== UNCLAIMED =============================================== |\n\n");
-	menu();
-}
-void view_all(){
-	system("cls");
+int view_all(){
+	printf("\n\t\t\t\t#################### FETCHING DATA ####################");
+	fordelay();
+	
 	FILE *clmd,*uclmd;
 	int count=0;
+	char line[500];
+	
 	clmd = fopen("claimed.txt","r");
 	uclmd = fopen("unclaimed.txt","r");
 	system("cls");
+	
 	printf("\n\n\t| ================================================= CLAIMED ================================================= |\n\n");
 	if(!clmd){
 		printf("\n Unable to open : claimed.txt.");
 		return -1;
-	}
-	char line[500];
+	}	
 	printf("\n\t\t-------------------------------------------------------------------------------------------\n");
 	printf("\t\tRef. Code\tAmount\t\tSender\t\tPhone\t\tReceiver\tPhone");
 	printf("\n\t\t-------------------------------------------------------------------------------------------\n");
@@ -264,6 +251,7 @@ void view_all(){
 		printf("\t\t\t\t\t\tNO CLAIMED TRANSACTIONS\n");
 	}
 	printf("\t\t-------------------------------------------------------------------------------------------\n");
+	
 	printf("\n\n\t| =============================================== UNCLAIMED ================================================= |\n\n");
 	if(!uclmd){
 		printf("\n Unable to open : unclaimed.txt.");
@@ -281,98 +269,185 @@ void view_all(){
 		printf("\t\t\t\t\t\tNO UNCLAIMED TRANSACTIONS\n");
 	}
 	printf("\t\t-------------------------------------------------------------------------------------------\n");
+	
 	fclose(clmd);
 	fclose(uclmd);
 	menu();
 }
-void main_exit(){
-	system("cls");
-	printf("\n| ================================= THANK YOU FOR USING MONEY TRANSFER SYSTEM ================================= |\n");
-	printf("\t\t\t\t\t    [Developed by Kurt Timajo]");
-	exit(0);
+
+int view_claimed(){
+	printf("\n\t\t\t\t#################### FETCHING DATA ####################");
+	fordelay();
+	printf("\n\n\t| ================================================= CLAIMED ================================================= |\n\n");
+	FILE *fp;
+	char fileName[20] = "claimed.txt",line[500];;
+	int count=0;
+	
+	fp = fopen("claimed.txt","r");
+	if(!fp){
+		printf("\n Unable to open : %s ", fileName);
+		return -1;
+	}
+	
+	printf("\n\t\t-------------------------------------------------------------------------------------------\n");
+	printf("\t\tRef. Code\tAmount\t\tSender\t\tPhone\t\tReceiver\tPhone");
+	printf("\n\t\t-------------------------------------------------------------------------------------------\n");
+	while (fgets(line, sizeof(line), fp)) {
+		count++;
+		printf("\t\t%s", line); 	
+	}
+	if(!count){
+		printf("\t\t\t\t\t\tNO CLAIMED TRANSACTIONS\n");
+	}
+	printf("\t\t-------------------------------------------------------------------------------------------\n");
+	fclose(fp);
+	
+	printf("\n\n\t| ================================================= CLAIMED ================================================= |\n\n");
+	menu();
+}
+
+int view_unclaimed(){
+	printf("\n\t\t\t\t#################### FETCHING DATA ####################");
+	fordelay();
+	printf("\n\n\t| =============================================== UNCLAIMED =============================================== |\n\n");
+	
+	FILE *fp;
+	char fileName[20] = "unclaimed.txt",line[500];
+	int count=0;
+	
+	fp = fopen("unclaimed.txt","r");
+	if(!fp){
+		printf("\n Unable to open : %s ", fileName);
+		return -1;
+	} 
+	printf("\n\t\t-------------------------------------------------------------------------------------------\n");
+	printf("\t\tRef. Code\tAmount\t\tSender\t\tPhone\t\tReceiver\tPhone");
+	printf("\n\t\t-------------------------------------------------------------------------------------------\n");
+	while (fgets(line, sizeof(line), fp)) {
+		count++;
+		printf("\t\t%s", line); 
+	}
+	if(!count){
+		printf("\t\t\t\t\t\tNO UNCLAIMED TRANSACTIONS\n");
+	}
+	printf("\t\t-------------------------------------------------------------------------------------------\n");
+	fclose(fp);
+	
+	printf("\n\n\t| =============================================== UNCLAIMED =============================================== |\n\n");
+	menu();
 }
 
 void _login(int *log){
 	system("cls");
+	fordelay();
 	printf("\n\n\t| ================================================= LOGIN ================================================= |\n\n");
+	
 	FILE *accounts;
 	accounts = fopen("accounts.txt","r");
+	
 	char ch;	
-	printf("\t\tEmail: ");
+	
+	printf("\t\t\t\tEmail: ");
 	ch=getchar();
 	gets(login.email);
-	printf("\t\tPassword: ");
+	printf("\t\t\t\tPassword: ");
 	gets(login.password);
+	
 	while(fscanf(accounts,"%s\t%s",&check.email,&check.password) != EOF){
 		if((strcmp(check.email,login.email)==0) && (strcmp(check.password,login.password)==0)){
-			printf("\n\t\t#################### LOGIN SUCCESSFUL ####################");
+			system("cls");
+			printf("\n\t\t\t\t#################### LOGIN SUCCESSFUL ####################");
+			fordelay();
 			*log = 1;
 		}
 	}
+	
+	strcpy(loggedEmail,login.email);
 	fclose(accounts);
 }
+
 void _signup(int *sgd){
-	system("cls");
+	fordelay();
 	printf("\n\n\t| ================================================= SIGN UP ================================================= |\n\n");
-	FILE *accounts;
 	
+	FILE *accounts;	
 	char line[500],ch,*token;
 	int exist=0;
-	printf("\t\t\tPlease enter the required information \n");
+	
+	printf("\t\t\t\tPlease enter the required information \n");
+	
 	enter_acc:
 	accounts = fopen("accounts.txt","a+");
-	printf("\t\t\tEnter your e-mail: ");
+	printf("\t\t\t\tEnter your e-mail: ");
 	ch = getchar();
 	gets(signup.email);	
 	while (fgets(line, sizeof(line), accounts)) {
 		token = strtok(line,"\t");	
 		if(strcmp(token,signup.email) == 0){		
-			printf("\n\t\t\t!!!!!!!!!! Account already existed !!!!!!!!!!\n");
+			printf("\n\t\t\t\t!!!!!!!!!! Account already existed !!!!!!!!!!\n");
 			exist = 1;
 		}
 	}
+	
 	if(!exist){
-		printf("\t\t\tEnter your password: ");
+		printf("\t\t\t\tEnter your password: ");
 		gets(signup.password);	
 		*sgd = 1;
 	}
+	
 	fprintf(accounts,"%s\t%s\n",signup.email,signup.password);
+	strcpy(loggedEmail,login.email);
 	fclose(accounts);
+}
+
+void main_exit(){
+	system("cls");
+	fordelay();
+	printf("\n\n\n\t| ================================= THANK YOU FOR USING MONEY TRANSFER SYSTEM ================================= |\n");
+	printf("\t\t\t\t\t\t    [Developed by Kurt Timajo]");
+	exit(0);
 }
 
 void edit_acc(char _current_email[30], char _new_email[30], char _new_password[30]){
 	FILE *acc,*temp;
+	char line[500],temp_line[50],*token;
+	
 	acc = fopen("accounts.txt","r");
 	temp = fopen("temp.txt","a+");
-	int found=0;
-	char line[500],temp_line[50],*token;
+	
 	while(fgets(line, sizeof(line), acc)){
 		strcpy(temp_line,line);
 		token = strtok(line,"\t");
 		if(strcmp(token,_current_email) != 0){
 			fprintf(temp,"%s",temp_line);
 		}
-	}
+	}		
 	fprintf(temp,"%s\t%s\n",_new_email,_new_password);
 	fclose(acc);
 	fclose(temp);
+	
 	acc = fopen("accounts.txt","w");
 	temp = fopen("temp.txt","r");
 	while(fgets(line, sizeof(line), temp)){
 		fprintf(acc,"%s",line);
 	}
-	printf("\n\t\t#################### ACCOUNT EDITED SUCCESSFULLY ####################");
+	fordelay();
+	printf("\n\t\t\t\t#################### ACCOUNT EDITED SUCCESSFULLY ####################");
+	
 	fclose(acc);
-	fclose(temp);
+	fclose(temp);	
 	remove("temp.txt");
+	
 	menu();
 }
+
 void delete_acc(char _email[30]){
 	FILE *acc,*temp;
+	char line[500],temp_line[50],*token;
+	
 	acc = fopen("accounts.txt","r");
 	temp = fopen("temp.txt","a+");
-	int found=0;
-	char line[500],temp_line[50],*token;
+	
 	while(fgets(line, sizeof(line), acc)){
 		strcpy(temp_line,line);
 		token = strtok(line,"\t");
@@ -380,68 +455,97 @@ void delete_acc(char _email[30]){
 			fprintf(temp,"%s",temp_line);
 		}
 	}
+	
 	fclose(acc);
 	fclose(temp);
+	
 	acc = fopen("accounts.txt","w");
 	temp = fopen("temp.txt","r");
 	while(fgets(line, sizeof(line), temp)){
 		fprintf(acc,"%s",line);
 	}
-	system("cls");
+	fordelay();
 	printf("\n\t\t\t#################### ACCOUNT DELETED SUCCESSFULLY ####################");
+	fordelay();
+	
 	fclose(acc);
 	fclose(temp);
 	remove("temp.txt");
 	main();
 }
+
+int emailExists(char _email[30]){
+	FILE *acc;
+	int exist=0;
+	char *token,line[500];
+	acc = fopen("accounts.txt","r");
+	while(fgets(line, sizeof(line), acc)){
+		token = strtok(line,"\t");
+		if(strcmp(token,_email) == 0){
+			exist = 1;
+		}
+	}
+	fclose(acc);
+	return exist;
+}
+
 void acc_settings(){
-	system("cls");
+	fordelay();
 	printf("\n\n\t| ============================================ ACCOUNT SETTINGS =========================================== |\n\n");
 	int task;
 	char ch,cur_email[30],new_email[30],new_password[15];
+	
 	choose_task:
-	printf("\n\n\t\t\t1. EDIT ACCOUNT\n");
-	printf("\n\t\t\t2. DELETE ACCOUNT\n");
-	printf("\n\t\t\t0.  MENU\n\n\t\t\t>> ");
+	printf("\n\n\t\t\t\t1. EDIT ACCOUNT\n");
+	printf("\n\t\t\t\t2. DELETE ACCOUNT\n");
+	printf("\n\t\t\t\t0.  MENU\n\n\t\t\t\t>> ");
 	scanf("%d",&task);
 	
-	switch(task){
-		case 1:
-			printf("\n\n\t\t\t#################### EDIT YOUR ACCOUNT ####################");
-			printf("\n\n\t\t\t\tEnter your current email: ");
-			ch = getchar();
-			gets(cur_email);
-			printf("\n\t\t\t\tEnter your new email: ");
-			gets(new_email);
-			printf("\t\t\t\tEnter your new password: ");
-			gets(new_password);
-			edit_acc(cur_email,new_email,new_password);
-			break;
-		case 2:
-			printf("\n\n\t\t\t#################### DELETE YOUR ACCOUNT ####################");
-			printf("\n\n\t\t\t\tEnter your current email: ");
-			ch = getchar();
-			gets(cur_email);
-			delete_acc(cur_email);
-			break;
-		case 0:
-			system("cls");
-			menu();
-			break;
-		default:
-			system("cls");
-			printf("\t\t!!!!!!!!!!!! INVALID SELECTION !!!!!!!!!!!!");
-			goto choose_task;
+	if(task == 1){
+		fordelay();
+		enter_new:
+		printf("\n\n\t\t\t#################### EDIT YOUR ACCOUNT ####################");
+		
+		printf("\n\n\t\t\t\tEnter your new email: ");
+		ch = getchar();
+		gets(new_email);
+		printf("\n\t\t\t\tEnter your new password: ");
+		gets(new_password);
+		if(emailExists(new_email)){
+			printf("\n\t\t\t\t!!!!!!!!!! Email is existing already. !!!!!!!!!!\n");
+			fordelay();
+			goto enter_new;
+		}
+		else{
+			edit_acc(loggedEmail,new_email,new_password);
+		}		
 	}
+	else if(task == 2){
+		fordelay();
+		printf("\n\n\t\t\t#################### DELETE YOUR ACCOUNT ####################");
+		delete_acc(loggedEmail);
+	}
+	else if(task == 0){
+		fordelay();
+		menu();
+	} 
+	else{
+		system("cls");
+		printf("\t\t\t\t!!!!!!!!!!!! INVALID SELECTION !!!!!!!!!!!!");
+		goto choose_task;
+	}
+	
 }
+
 int landing(){
 	int task;
-	printf("\n\t\t1. Login\n\n");
-	printf("\t\t2. Sign Up\n\n");
-	printf("\t\t0. Exit\n\n\t\t>> ");
+	printf("\n\t\t\t\t1. Login\n\n");
+	printf("\t\t\t\t2. Sign Up\n\n");
+	printf("\t\t\t\t0. Exit\n\n\t\t\t\t>> ");
 	scanf("%d",&task);
 	return task;
 }
+
 void menu(){
 	int ch;
 	choose_task:
@@ -475,6 +579,8 @@ void menu(){
 			break;
 		case 0:
 			system("cls");
+			printf("\n\t\t\t\t#################### LOGGING OUT ####################");
+			fordelay();
 			main();
 			break;
 		default:
@@ -483,10 +589,11 @@ void menu(){
 			goto choose_task;
 	}
 }
+
 void main(){
-	int task,*logged=0,*signed_up=0;
-	
+	int task,logged=0,signed_up=0;
 	printf("\n\t| ================================== WELCOME TO MONEY TRANSFER SYSTEM ================================== |\n");
+	
 	entry:
 	task = landing();	
 	if(task == 1){
@@ -505,12 +612,13 @@ void main(){
 	else if(task==2){
 		_signup(&signed_up);
 		if(signed_up){
-			system("cls");
+			fordelay();
 			printf("\n\t| ================================== WELCOME TO MONEY TRANSFER SYSTEM ================================== |\n");
 			menu();
 		} else{
 			system("cls");
 			printf("\n\t\t#################### SIGNUP FAILED ####################\n");
+			fordelay();
 			goto entry;
 		}
 	}
