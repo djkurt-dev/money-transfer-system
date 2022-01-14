@@ -1,16 +1,15 @@
-
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <windows.h>
-#include <stdio.h>
 
 void menu();
 void main();
 int sendmoney();
 char loggedEmail[30];
 
-typedef struct transaction{
+typedef struct {
 	char code[12];
 	double amount;
 	char sender[100];
@@ -396,7 +395,7 @@ void _signup(int *sgd){
 	}
 	
 	fprintf(accounts,"%s\t%s\n",signup.email,signup.password);
-	strcpy(loggedEmail,login.email);
+	strcpy(loggedEmail,signup.email);
 	fclose(accounts);
 }
 
