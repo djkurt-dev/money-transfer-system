@@ -4,6 +4,10 @@
 #include <time.h>
 #include <windows.h>
 
+//Timajo, Kurt Vincent
+//CpE - 1B
+//PIT in CPE112: Programming Logic and Design
+
 void menu();
 void main();
 int sendmoney();
@@ -59,9 +63,9 @@ int sendmoney(){
 	int code;
 	double charge, total;
 	
-	FILE *fp;
-	fp = fopen("unclaimed.txt","a");
-	if(!fp){
+	FILE *uclmd;
+	uclmd = fopen("unclaimed.txt","a");
+	if(!uclmd){
 		printf("\n Unable to open : %s.", fileName);
 		return -1;
 	}
@@ -129,11 +133,11 @@ int sendmoney(){
 	
 	
 	
-	fprintf(fp,"%s\t%.2lf\t\t%s\t%s\t%s\t%s\n",tr.code,tr.amount,tr.sender,tr.sender_phone,tr.receiver,tr.receiver_phone);
+	fprintf(uclmd,"%s\t%.2lf\t\t%s\t%s\t%s\t%s\n",tr.code,tr.amount,tr.sender,tr.sender_phone,tr.receiver,tr.receiver_phone);
 	printf("\n\n\t| ***************************************** MONEY SENT SUCCESSFULLY ****************************************** |\n");
 	printf("\n\t\t\t\tREFERENCE CODE: %37s\n\t\t\t\tSENDER\n\t\t\t\t\t%45s\n\t\t\t\t\t%45s\n\t\t\t\tRECEIVER\n\t\t\t\t\t%45s\n\t\t\t\t\t%45s\n\t\t\t\tAmount: Php%42.2lf\n\t\t\t\tService Fee: Php%37.2lf\n\t\t\t\tTOTAL => Php%41.2lf",tr.code,tr.sender,tr.sender_phone,tr.receiver,tr.receiver_phone,tr.amount,charge,total);
 
-	fclose(fp);
+	fclose(uclmd);
 	menu();
 }
 
@@ -142,7 +146,7 @@ void claim(){
 	printf("\n\n\t| ================================================= CLAIM MONEY ================================================= |\n\n");
 
 	transaction cl;
-	FILE *fp,*fp2,*temp;
+	FILE *uclmd,*clmd,*temp;
 	char cont,line[500],*token,ch,code[15],temp_line[500];
 	int found=0;
 	
@@ -150,10 +154,10 @@ void claim(){
 	printf("\n\t\tEnter Reference Code: ");	
 	scanf("%s",code);
 	
-	fp = fopen("unclaimed.txt","r");
-	fp2 = fopen("claimed.txt","a");
+	uclmd = fopen("unclaimed.txt","r");
+	clmd = fopen("claimed.txt","a");
 	
-	while (fgets(line, sizeof(line), fp)) {
+	while (fgets(line, sizeof(line), uclmd)) {
 		token = strtok(line,"\t");		
 		if(strcmp(token,code) == 0){		
 			found=1;	
@@ -169,9 +173,9 @@ void claim(){
 			gets(cl.sender_phone);
 			printf("\n\t\tAMOUNT: ");
 			scanf("%lf",&cl.amount);
-			fprintf(fp2,"%s\t%.2lf\t\t%s\t%s\t%s\t%s\n",cl.code,cl.amount,cl.sender,cl.sender_phone,cl.receiver,cl.receiver_phone);
-			fclose(fp);
-			fclose(fp2);
+			fprintf(clmd,"%s\t%.2lf\t\t%s\t%s\t%s\t%s\n",cl.code,cl.amount,cl.sender,cl.sender_phone,cl.receiver,cl.receiver_phone);
+			fclose(uclmd);
+			fclose(clmd);
 		}
 	}
 	
@@ -195,8 +199,8 @@ void claim(){
 	}	
 	
 	temp = fopen("temp.txt","w");
-	fp = fopen("unclaimed.txt","r");
-	while(fgets(line, sizeof(line), fp)){
+	uclmd = fopen("unclaimed.txt","r");
+	while(fgets(line, sizeof(line), uclmd)){
 		strcpy(temp_line,line);
 		token = strtok(line,"\t");
 		if(strcmp(token,code) != 0){
@@ -204,16 +208,16 @@ void claim(){
 		}
 	}	
 	fclose(temp);
-	fclose(fp);	
+	fclose(uclmd);	
 	
 	//modifying the unclaimed records
 	temp = fopen("temp.txt","r");
-	fp = fopen("unclaimed.txt","w");
+	uclmd = fopen("unclaimed.txt","w");
 	while(fgets(line, sizeof(line), temp)){
-		fprintf(fp,"%s",line);
+		fprintf(uclmd,"%s",line);
 	}		
 	fclose(temp);
-	fclose(fp);
+	fclose(uclmd);
 	remove("temp.txt");
 	
 	fordelay();
@@ -222,7 +226,7 @@ void claim(){
 	menu();
 }
 
-int view_all(){
+void view_all(){
 	printf("\n\t\t\t\t#################### FETCHING DATA ####################");
 	fordelay();
 	
@@ -236,8 +240,8 @@ int view_all(){
 	
 	printf("\n\n\t| ================================================= CLAIMED ================================================= |\n\n");
 	if(!clmd){
-		printf("\n Unable to open : claimed.txt.");
-		return -1;
+		printf("\n\t\t\t\t Unable to open : claimed.txt.");
+		goto skip;
 	}	
 	printf("\n\t\t-------------------------------------------------------------------------------------------\n");
 	printf("\t\tRef. Code\tAmount\t\tSender\t\tPhone\t\tReceiver\tPhone");
@@ -250,11 +254,11 @@ int view_all(){
 		printf("\t\t\t\t\t\tNO CLAIMED TRANSACTIONS\n");
 	}
 	printf("\t\t-------------------------------------------------------------------------------------------\n");
-	
+	skip:
 	printf("\n\n\t| =============================================== UNCLAIMED ================================================= |\n\n");
 	if(!uclmd){
-		printf("\n Unable to open : unclaimed.txt.");
-		return -1;
+		printf("\n\t\t\t\t Unable to open : unclaimed.txt.");
+		menu();
 	}
 	count=0;
 	printf("\n\t\t-------------------------------------------------------------------------------------------\n");
@@ -274,7 +278,7 @@ int view_all(){
 	menu();
 }
 
-int view_claimed(){
+void view_claimed(){
 	printf("\n\t\t\t\t#################### FETCHING DATA ####################");
 	fordelay();
 	printf("\n\n\t| ================================================= CLAIMED ================================================= |\n\n");
@@ -284,8 +288,8 @@ int view_claimed(){
 	
 	fp = fopen("claimed.txt","r");
 	if(!fp){
-		printf("\n Unable to open : %s ", fileName);
-		return -1;
+		printf("\n\t\t\t\t Unable to open : %s ", fileName);
+		menu();
 	}
 	
 	printf("\n\t\t-------------------------------------------------------------------------------------------\n");
@@ -305,7 +309,7 @@ int view_claimed(){
 	menu();
 }
 
-int view_unclaimed(){
+void view_unclaimed(){
 	printf("\n\t\t\t\t#################### FETCHING DATA ####################");
 	fordelay();
 	printf("\n\n\t| =============================================== UNCLAIMED =============================================== |\n\n");
@@ -316,8 +320,8 @@ int view_unclaimed(){
 	
 	fp = fopen("unclaimed.txt","r");
 	if(!fp){
-		printf("\n Unable to open : %s ", fileName);
-		return -1;
+		printf("\n\t\t\t\t Unable to open : %s ", fileName);
+		menu();
 	} 
 	printf("\n\t\t-------------------------------------------------------------------------------------------\n");
 	printf("\t\tRef. Code\tAmount\t\tSender\t\tPhone\t\tReceiver\tPhone");
@@ -408,13 +412,13 @@ void main_exit(){
 }
 
 void edit_acc(char _current_email[30], char _new_email[30], char _new_password[30]){
-	FILE *acc,*temp;
+	FILE *accounts,*temp;
 	char line[500],temp_line[50],*token;
 	
-	acc = fopen("accounts.txt","r");
+	accounts = fopen("accounts.txt","r");
 	temp = fopen("temp.txt","a+");
 	
-	while(fgets(line, sizeof(line), acc)){
+	while(fgets(line, sizeof(line), accounts)){
 		strcpy(temp_line,line);
 		token = strtok(line,"\t");
 		if(strcmp(token,_current_email) != 0){
@@ -422,18 +426,18 @@ void edit_acc(char _current_email[30], char _new_email[30], char _new_password[3
 		}
 	}		
 	fprintf(temp,"%s\t%s\n",_new_email,_new_password);
-	fclose(acc);
+	fclose(accounts);
 	fclose(temp);
 	
-	acc = fopen("accounts.txt","w");
+	accounts = fopen("accounts.txt","w");
 	temp = fopen("temp.txt","r");
 	while(fgets(line, sizeof(line), temp)){
-		fprintf(acc,"%s",line);
+		fprintf(accounts,"%s",line);
 	}
 	fordelay();
 	printf("\n\t\t\t\t#################### ACCOUNT EDITED SUCCESSFULLY ####################");
 	
-	fclose(acc);
+	fclose(accounts);
 	fclose(temp);	
 	remove("temp.txt");
 	
@@ -497,7 +501,7 @@ void acc_settings(){
 	choose_task:
 	printf("\n\n\t\t\t\t1. EDIT ACCOUNT\n");
 	printf("\n\t\t\t\t2. DELETE ACCOUNT\n");
-	printf("\n\t\t\t\t0.  MENU\n\n\t\t\t\t>> ");
+	printf("\n\t\t\t\t0. MENU\n\n\t\t\t\t>> ");
 	scanf("%d",&task);
 	
 	if(task == 1){
@@ -552,8 +556,8 @@ void menu(){
 	printf("\n\t\t\t\t\t1. SEND MONEY");
 	printf("\n\t\t\t\t\t2. CLAIM MONEY");
 	printf("\n\t\t\t\t\t3. VIEW ALL TRANSACTIONS");
-	printf("\n\t\t\t\t\t4. VIEW CLAIMED");
-	printf("\n\t\t\t\t\t5. VIEW UNCLAIMED");
+	printf("\n\t\t\t\t\t4. VIEW CLAIMED TRANSACTIONS");
+	printf("\n\t\t\t\t\t5. VIEW UNCLAIMED TRANSACTIONS");
 	printf("\n\t\t\t\t\t6. ACCOUNT SETTINGS");
 	printf("\n\t\t\t\t\t0. LOGOUT\n\n\t\t\t\t\t>> ");
 	scanf("%d",&ch);
